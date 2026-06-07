@@ -1,1 +1,554 @@
 
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>CandiCar — Trouvez votre moniteur près de chez vous</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Saira+Condensed:wght@600;700;800;900&family=Hanken+Grotesk:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="./dist/output.css">
+</head>
+<body class="font-sans antialiased">
+
+
+<svg width="0" height="0" style="position:absolute">
+  <defs>
+    <linearGradient id="bodyRed" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#5e0a0a"/><stop offset=".45" stop-color="#E11D2B"/><stop offset="1" stop-color="#8c0410"/>
+    </linearGradient>
+    <linearGradient id="glass" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#3a3a45"/><stop offset="1" stop-color="#0b0b10"/>
+    </linearGradient>
+    <radialGradient id="floorRefl" cx="50%" cy="50%" r="50%">
+      <stop offset="0" stop-color="rgba(225,29,43,.35)"/><stop offset="1" stop-color="transparent"/>
+    </radialGradient>
+    <filter id="hl" x="-60%" y="-60%" width="220%" height="220%"><feGaussianBlur stdDeviation="3.5"/></filter>
+    <filter id="soft" x="-80%" y="-80%" width="260%" height="260%"><feGaussianBlur stdDeviation="22"/></filter>
+  </defs>
+</svg>
+
+<!-- ====================== NAV (épuré : logo + burger) ====================== -->
+<header class="sticky top-0 z-40 bg-noir/80 backdrop-blur-md border-b border-white/10">
+  <div class="max-w-6xl mx-auto px-5 h-16 flex items-center justify-between">
+    <button onclick="nav('home')" class="flex items-center gap-2.5">
+      <span class="grid place-items-center w-9 h-9 rounded-xl bg-red text-white shadow-[0_0_20px_-4px_rgba(225,29,43,.8)]">
+        <svg viewBox="0 0 24 24" class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 17h14M5 17a2 2 0 0 1-2-2v-2.5a3 3 0 0 1 .9-2.1l1.4-1.4A4 4 0 0 1 8.1 7.8h7.8a4 4 0 0 1 2.8 1.2l1.4 1.4a3 3 0 0 1 .9 2.1V15a2 2 0 0 1-2 2"/><circle cx="7.5" cy="17.5" r="1.6"/><circle cx="16.5" cy="17.5" r="1.6"/></svg>
+      </span>
+      <span class="font-display font-extrabold text-2xl tracking-tight uppercase">Candi<span class="text-red">Car</span></span>
+    </button>
+    <button onclick="openMenu()" aria-label="Menu" class="grid place-items-center w-11 h-11 rounded-xl bg-panel2 border border-white/10 hover:border-red transition text-white">
+      <svg viewBox="0 0 24 24" class="w-6 h-6" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M4 7h16M4 12h16M4 17h16"/></svg>
+    </button>
+  </div>
+</header>
+
+<!-- ====================== MENU OVERLAY (modèle Superprof / photo 3) ====================== -->
+<div id="menuOverlay" class="hidden fixed inset-0 z-50 bg-noir/97 backdrop-blur-md overflow-y-auto">
+  <div class="max-w-md mx-auto px-6 pt-6 pb-12">
+    <div class="flex justify-end">
+      <button onclick="closeMenu()" aria-label="Fermer" class="w-11 h-11 rounded-full bg-red text-white grid place-items-center hover:bg-red-bright transition">
+        <svg viewBox="0 0 24 24" class="w-6 h-6" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M18 6 6 18M6 6l12 12"/></svg>
+      </button>
+    </div>
+
+    <div class="mt-4 space-y-3">
+      <button onclick="goConnexion()" class="w-full py-4 rounded-2xl bg-red text-white font-extrabold uppercase tracking-wide hover:bg-red-bright transition shadow-[0_0_30px_-8px_rgba(225,29,43,.9)]">Connexion</button>
+      <button onclick="goConnexion()" class="w-full py-4 rounded-2xl bg-panel2 border border-white/10 text-white font-extrabold uppercase tracking-wide hover:border-white/30 transition">Inscription</button>
+    </div>
+
+    <div class="h-px bg-white/10 my-7"></div>
+
+    <div class="space-y-1">
+      <button onclick="goNav('resultats')" class="w-full flex items-center gap-4 py-4 text-lg font-bold text-white/90 hover:text-red transition">
+        <svg viewBox="0 0 24 24" class="w-6 h-6 text-white/40" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="7"/><path d="m20 20-3-3"/></svg>
+        Rechercher un moniteur
+      </button>
+      <button onclick="goNav('formules')" class="w-full flex items-center gap-4 py-4 text-lg font-bold text-white/90 hover:text-red transition">
+        <svg viewBox="0 0 24 24" class="w-6 h-6 text-white/40" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="7" width="18" height="13" rx="2"/><path d="M8 7V5a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>
+        Donner des cours
+      </button>
+      <button onclick="goNav('parrainage')" class="w-full flex items-center gap-4 py-4 text-lg font-bold text-white/90 hover:text-red transition">
+        <svg viewBox="0 0 24 24" class="w-6 h-6 text-white/40" fill="none" stroke="currentColor" stroke-width="2"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+        Parrainage <span class="ml-auto text-xs font-extrabold bg-blue text-white px-2 py-0.5 rounded-full">2 mois offerts</span>
+      </button>
+      <button onclick="goNav('apropos')" class="w-full flex items-center gap-4 py-4 text-lg font-bold text-white/90 hover:text-red transition">
+        <svg viewBox="0 0 24 24" class="w-6 h-6 text-white/40" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9"/><path d="M12 16v-4M12 8h.01"/></svg>
+        À propos
+      </button>
+      <button onclick="goNav('aide')" class="w-full flex items-center gap-4 py-4 text-lg font-bold text-white/90 hover:text-red transition">
+        <svg viewBox="0 0 24 24" class="w-6 h-6 text-white/40" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9"/><path d="M9.5 9a2.5 2.5 0 1 1 3.5 2.3c-.6.3-1 .9-1 1.7M12 17h.01"/></svg>
+        Aide &amp; support
+      </button>
+    </div>
+  </div>
+</div>
+
+<main>
+
+<!-- ====================== ECRAN 1 : PRÉSENTATION ====================== -->
+<section id="home" class="screen active">
+  <div class="max-w-5xl mx-auto px-5 pt-8 md:pt-12 pb-16">
+
+    <p class="rise text-center text-red font-bold uppercase tracking-[.2em] text-xs" style="animation-delay:.05s">1ʳᵉ plateforme moniteur ↔ candidat libre en France</p>
+    <h1 class="rise font-display font-extrabold uppercase text-center tracking-tight text-5xl sm:text-6xl md:text-7xl leading-[0.9] mt-3" style="animation-delay:.1s">
+      Trouvez votre <span class="text-red">moniteur</span><br>près de chez vous.
+    </h1>
+
+    <!-- "ECRAN" voiture (structure maquette wallpaper) — recherche uniquement, épuré -->
+    <div class="rise mt-8 rounded-[1.6rem] glow-red overflow-hidden relative bg-noir aspect-[16/10] sm:aspect-[16/9]" style="animation-delay:.2s">
+      <svg viewBox="0 0 720 405" class="absolute inset-0 w-full h-full" preserveAspectRatio="xMidYMid slice" aria-label="Voiture de sport">
+        <rect width="720" height="405" fill="#070708"/>
+        <ellipse cx="360" cy="250" rx="300" ry="150" fill="url(#floorRefl)" filter="url(#soft)"/>
+        <ellipse class="smoke" cx="150" cy="230" rx="120" ry="60" fill="rgba(225,29,43,.18)" filter="url(#soft)"/>
+        <ellipse class="smoke" style="animation-delay:-4s" cx="580" cy="210" rx="130" ry="70" fill="rgba(255,255,255,.07)" filter="url(#soft)"/>
+        <rect y="360" width="720" height="45" fill="#0c0c10"/>
+        <ellipse cx="360" cy="362" rx="250" ry="14" fill="rgba(225,29,43,.25)" filter="url(#soft)"/>
+        <g>
+          <path d="M110 300 C110 244 165 210 250 202 L470 202 C555 210 610 244 610 300 L610 332 C610 348 596 358 578 358 L142 358 C124 358 110 348 110 332 Z" fill="url(#bodyRed)"/>
+          <path d="M250 205 C266 168 302 152 360 152 C418 152 454 168 470 205 Z" fill="url(#bodyRed)"/>
+          <path d="M288 202 C302 176 327 166 360 166 C393 166 418 176 432 202 Z" fill="url(#glass)"/>
+          <path d="M360 168 L360 250" stroke="rgba(0,0,0,.35)" stroke-width="2"/>
+          <path d="M315 210 L330 250 M405 210 L390 250" stroke="rgba(0,0,0,.25)" stroke-width="2" fill="none"/>
+          <path d="M250 205 C266 168 302 152 360 152 C418 152 454 168 470 205" fill="none" stroke="#ff5666" stroke-width="2.5" opacity=".7"/>
+          <path d="M468 224 L556 240 L551 262 L466 248 Z" fill="#eaf6ff" filter="url(#hl)"/>
+          <path d="M252 224 L164 240 L169 262 L254 248 Z" fill="#eaf6ff" filter="url(#hl)"/>
+          <path d="M470 230 L548 244 L545 256 L469 244 Z" fill="#ffffff"/>
+          <path d="M250 230 L172 244 L175 256 L251 244 Z" fill="#ffffff"/>
+          <path d="M150 318 L250 318 L238 350 L162 350 Z" fill="#0b0b0e"/>
+          <path d="M470 318 L570 318 L558 350 L482 350 Z" fill="#0b0b0e"/>
+          <path d="M300 320 L420 320 L408 350 L312 350 Z" fill="#0e0e12"/>
+          <path d="M312 330 H408 M315 340 H405" stroke="rgba(255,255,255,.08)" stroke-width="2"/>
+          <rect x="150" y="350" width="420" height="6" rx="3" fill="#1a1a20"/>
+          <rect x="150" y="350" width="420" height="2.5" rx="2" fill="rgba(255,255,255,.18)"/>
+          <circle cx="360" cy="232" r="7" fill="#0b0b0e" stroke="#ff5666" stroke-width="1.5"/>
+          <ellipse cx="170" cy="350" rx="40" ry="20" fill="#08080a"/>
+          <ellipse cx="550" cy="350" rx="40" ry="20" fill="#08080a"/>
+        </g>
+      </svg>
+      <div class="absolute inset-0 bg-gradient-to-t from-noir via-noir/30 to-transparent"></div>
+
+      <div class="absolute inset-0 flex flex-col items-center justify-end p-5 sm:p-8">
+        <div class="w-full max-w-lg bg-white rounded-2xl p-1.5 flex items-center gap-2 shadow-2xl">
+          <svg viewBox="0 0 24 24" class="w-5 h-5 ml-3 text-noir/40 shrink-0" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="7"/><path d="m20 20-3-3"/></svg>
+          <input type="text" placeholder="Ville, code postal…" class="flex-1 bg-transparent outline-none text-noir text-base placeholder:text-noir/40 min-w-0">
+          <button onclick="nav('resultats')" class="shrink-0 font-extrabold uppercase tracking-wide text-sm px-5 py-3 rounded-xl bg-red text-white hover:bg-red-bright transition">Recherche</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Toggle boîte : manuelle (rouge) / automatique (blanc + bleu Doctolib) -->
+    <div class="rise mt-4 max-w-lg mx-auto bg-panel2 border border-white/10 rounded-2xl p-1 grid grid-cols-2 text-sm" style="animation-delay:.28s">
+      <button id="btnManuelle" onclick="setBoite(0)" class="boite-btn py-3 rounded-xl bg-red text-white flex items-center justify-center gap-2 transition font-bold">
+        <svg viewBox="0 0 24 24" class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M12 5v4M12 15v4M5 12h4M15 12h4"/></svg> Boîte manuelle
+      </button>
+      <button id="btnAuto" onclick="setBoite(1)" class="boite-btn py-3 rounded-xl text-blue-light flex items-center justify-center gap-2 transition font-bold">
+        <span class="font-display font-extrabold text-base">A</span> Boîte automatique
+      </button>
+    </div>
+  </div>
+
+  <!-- COMMENT CA MARCHE -->
+  <div class="max-w-6xl mx-auto px-5 pb-16">
+    <h2 class="font-display font-extrabold uppercase text-3xl md:text-4xl text-center tracking-tight">Trois étapes, c'est plié</h2>
+    <div class="grid md:grid-cols-3 gap-4 mt-8">
+      <div class="bg-panel border border-white/10 rounded-2xl p-6 hover:border-red/50 transition">
+        <div class="font-display font-extrabold text-red text-3xl">01</div>
+        <h3 class="font-extrabold text-lg mt-1">Cherchez</h3>
+        <p class="text-white/50 text-sm mt-1">Filtrez par ville, type de boîte et prix.</p>
+      </div>
+      <div class="bg-panel border border-white/10 rounded-2xl p-6 hover:border-red/50 transition">
+        <div class="font-display font-extrabold text-red text-3xl">02</div>
+        <h3 class="font-extrabold text-lg mt-1">Réservez</h3>
+        <p class="text-white/50 text-sm mt-1">Choisissez un créneau vert sur le planning du moniteur.</p>
+      </div>
+      <div class="bg-panel border border-white/10 rounded-2xl p-6 hover:border-red/50 transition">
+        <div class="font-display font-extrabold text-red text-3xl">03</div>
+        <h3 class="font-extrabold text-lg mt-1">Conduisez</h3>
+        <p class="text-white/50 text-sm mt-1">Rappel automatique avant le RDV. Annulation possible.</p>
+      </div>
+    </div>
+
+    <div class="relative overflow-hidden mt-10 bg-panel border border-white/10 rounded-3xl p-8 md:p-10 flex flex-col md:flex-row items-center justify-between gap-6">
+      <svg viewBox="0 0 240 110" class="car-watermark right-0 bottom-0 w-72" style="opacity:.08"><path d="M15 78 q4 -2 12 -3 l10 -22 q5 -10 20 -11 l60 0 q14 1 22 11 l16 24 q18 1 28 6 q10 5 10 11 l-188 0 q-12 0 -12 -10 z M55 86 a14 14 0 1 0 0.1 0 M180 86 a14 14 0 1 0 0.1 0" fill="none" stroke="#fff" stroke-width="3"/></svg>
+      <div class="relative">
+        <h3 class="font-display font-extrabold uppercase text-2xl md:text-3xl">Vous êtes moniteur ?</h3>
+        <p class="text-white/55 mt-2 max-w-md">Remplissez votre planning, fixez vos tarifs et gérez vos réservations en un seul endroit.</p>
+      </div>
+      <button onclick="nav('formules')" class="relative shrink-0 font-extrabold uppercase tracking-wide px-6 py-3.5 rounded-full bg-red text-white hover:bg-red-bright transition shadow-[0_0_30px_-8px_rgba(225,29,43,.9)] active:scale-95">Donner des cours →</button>
+    </div>
+  </div>
+</section>
+
+<!-- ====================== ECRAN 2 : RÉSULTATS (fiches moniteurs) ====================== -->
+<section id="resultats" class="screen">
+  <div class="relative max-w-6xl mx-auto px-5 py-8 md:py-10">
+    <svg viewBox="0 0 240 110" class="car-watermark -right-6 top-0 w-64"><path d="M15 78 q4 -2 12 -3 l10 -22 q5 -10 20 -11 l60 0 q14 1 22 11 l16 24 q18 1 28 6 q10 5 10 11 l-188 0 q-12 0 -12 -10 z M55 86 a14 14 0 1 0 0.1 0 M180 86 a14 14 0 1 0 0.1 0" fill="none" stroke="#E11D2B" stroke-width="3"/></svg>
+    <button onclick="nav('home')" class="text-sm font-bold text-white/50 hover:text-white flex items-center gap-1 mb-4">
+      <svg viewBox="0 0 24 24" class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2.5"><path d="m15 18-6-6 6-6"/></svg> Accueil
+    </button>
+    <h1 class="font-display font-extrabold uppercase text-4xl md:text-5xl tracking-tight">Moniteurs à <span class="text-red">Paris</span></h1>
+    <p class="text-white/50 mt-1">14 moniteurs disponibles près de vous</p>
+
+    <div class="flex flex-wrap items-center gap-2 mt-6">
+      <button onclick="toggleChip(this,'red')" data-active="0" class="text-sm font-bold px-4 py-2 rounded-full bg-panel2 border border-white/10">Boîte manuelle</button>
+      <button onclick="toggleChip(this,'blue')" data-active="0" class="text-sm font-bold px-4 py-2 rounded-full bg-panel2 border border-white/10">Boîte auto</button>
+      <button onclick="toggleChip(this,'red')" data-active="0" class="text-sm font-bold px-4 py-2 rounded-full bg-panel2 border border-white/10">≤ 30 €/h</button>
+    </div>
+
+    <div id="resultsList" class="grid sm:grid-cols-2 gap-4 mt-7"></div>
+  </div>
+</section>
+
+<!-- ====================== ECRAN 3 : FICHE MONITEUR + PLANNING + AVIS ====================== -->
+<section id="profil" class="screen">
+  <div class="relative max-w-5xl mx-auto px-5 py-8 md:py-10">
+    <svg viewBox="0 0 240 110" class="car-watermark right-0 -top-2 w-56"><path d="M15 78 q4 -2 12 -3 l10 -22 q5 -10 20 -11 l60 0 q14 1 22 11 l16 24 q18 1 28 6 q10 5 10 11 l-188 0 q-12 0 -12 -10 z M55 86 a14 14 0 1 0 0.1 0 M180 86 a14 14 0 1 0 0.1 0" fill="none" stroke="#E11D2B" stroke-width="3"/></svg>
+    <button onclick="nav('resultats')" class="text-sm font-bold text-white/50 hover:text-white flex items-center gap-1 mb-5">
+      <svg viewBox="0 0 24 24" class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2.5"><path d="m15 18-6-6 6-6"/></svg> Retour aux résultats
+    </button>
+
+    <div class="bg-panel border border-white/10 rounded-3xl p-6 md:p-8 flex flex-col sm:flex-row gap-6">
+      <div class="shrink-0">
+        <div class="w-24 h-24 rounded-2xl bg-red/15 border border-red/30 grid place-items-center text-red font-display font-extrabold text-5xl">K</div>
+      </div>
+      <div class="flex-1">
+        <div class="flex flex-wrap items-start justify-between gap-3">
+          <div>
+            <h1 class="font-display font-extrabold uppercase text-3xl tracking-tight">Karim B.</h1>
+            <p class="text-white/55 flex items-center gap-1.5 mt-1 text-sm">
+              <svg viewBox="0 0 24 24" class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0z"/><circle cx="12" cy="10" r="2.5"/></svg>
+              Paris 11ᵉ · rayon de 8 km
+            </p>
+          </div>
+          <span class="font-display font-extrabold text-3xl text-red">28 €<span class="text-base font-bold text-white/40">/h</span></span>
+        </div>
+        <div class="flex flex-wrap gap-2 mt-4">
+          <span class="text-xs font-bold px-3 py-1.5 rounded-full bg-red/15 text-red border border-red/30">⚙️ Boîte manuelle</span>
+          <span class="text-xs font-bold px-3 py-1.5 rounded-full bg-dispo/15 text-dispo border border-dispo/30">● 3 créneaux aujourd'hui</span>
+        </div>
+        <p class="text-white/60 mt-4 text-sm leading-relaxed">Moniteur diplômé depuis 9 ans, patient et pédagogue. Spécialiste de l'examen en candidat libre. Véhicule double commande.</p>
+      </div>
+    </div>
+
+    <!-- PLANNING -->
+    <div class="mt-6 bg-panel border border-white/10 rounded-3xl p-5 md:p-7">
+      <div class="flex flex-wrap items-center justify-between gap-3">
+        <h2 class="font-display font-extrabold uppercase text-2xl tracking-tight">Planning &amp; réservation</h2>
+        <div class="flex items-center gap-4 text-xs font-bold">
+          <span class="flex items-center gap-1.5"><span class="w-3 h-3 rounded bg-dispo"></span> Dispo</span>
+          <span class="flex items-center gap-1.5"><span class="w-3 h-3 rounded bg-reserve"></span> Réservé</span>
+          <span class="flex items-center gap-1.5"><span class="w-3 h-3 rounded bg-indispo"></span> Indispo</span>
+        </div>
+      </div>
+      <p class="text-white/40 text-sm mt-2 mb-4">Cliquez sur un créneau <span class="text-dispo font-bold">vert</span> pour le réserver.</p>
+      <div class="overflow-x-auto -mx-1 px-1">
+        <div id="calendar" class="min-w-[640px]"></div>
+      </div>
+      <button onclick="nav('connexion')" class="mt-6 w-full font-extrabold uppercase tracking-wide px-6 py-4 rounded-2xl bg-red text-white hover:bg-red-bright transition flex items-center justify-center gap-2 shadow-[0_0_30px_-8px_rgba(225,29,43,.9)]">
+        <svg viewBox="0 0 24 24" class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+        Contacter Karim
+      </button>
+    </div>
+
+    <!-- AVIS (sans note chiffrée, mais on peut en laisser un) -->
+    <div class="mt-6 bg-panel border border-white/10 rounded-3xl p-5 md:p-7">
+      <div class="flex flex-wrap items-center justify-between gap-3">
+        <h2 class="font-display font-extrabold uppercase text-2xl tracking-tight">Avis des élèves</h2>
+        <button onclick="toast('Formulaire avis (démo)')" class="text-sm font-extrabold uppercase tracking-wide px-4 py-2.5 rounded-full bg-red text-white hover:bg-red-bright transition">Laisser un avis</button>
+      </div>
+      <div class="mt-4 grid sm:grid-cols-2 gap-3">
+        <div class="bg-panel2 rounded-2xl p-4">
+          <p class="text-white/80 text-sm leading-relaxed">« Super pédagogue, j'ai eu mon permis du premier coup. »</p>
+          <p class="text-white/40 text-xs mt-3 font-bold">— Yanis, mars 2026</p>
+        </div>
+        <div class="bg-panel2 rounded-2xl p-4">
+          <p class="text-white/80 text-sm leading-relaxed">« Patient et toujours à l'heure, je recommande les yeux fermés. »</p>
+          <p class="text-white/40 text-xs mt-3 font-bold">— Inès, février 2026</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ====================== ECRAN 4 : CONNEXION (modèle photo 2) ====================== -->
+<section id="connexion" class="screen">
+  <div class="relative max-w-md mx-auto px-5 py-12 md:py-16 text-center">
+    <button onclick="back()" class="absolute left-5 top-12 text-white/40 hover:text-white">
+      <svg viewBox="0 0 24 24" class="w-7 h-7" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 6 6 18M6 6l12 12"/></svg>
+    </button>
+    <div class="grid place-items-center w-16 h-16 rounded-2xl bg-red text-white mx-auto shadow-[0_0_30px_-6px_rgba(225,29,43,.9)]">
+      <span class="font-display font-extrabold text-4xl">C</span>
+    </div>
+    <h1 class="font-display font-extrabold uppercase text-4xl tracking-tight mt-6">Connectez-vous</h1>
+    <p class="text-white/50 mt-2">Pour réserver votre créneau avec un moniteur.</p>
+
+    <div class="mt-8 space-y-3 text-left">
+      <input type="email" placeholder="Adresse email" class="w-full bg-panel2 border border-white/10 rounded-2xl px-5 py-4 outline-none text-white focus:border-red transition placeholder:text-white/35">
+      <button class="w-full font-extrabold uppercase tracking-wide px-5 py-4 rounded-2xl bg-red text-white hover:bg-red-bright transition shadow-[0_0_30px_-8px_rgba(225,29,43,.9)] active:scale-[.98]">Connexion</button>
+
+      <div class="flex items-center gap-3 py-2 text-white/35 text-sm font-bold">
+        <span class="flex-1 h-px bg-white/10"></span> ou <span class="flex-1 h-px bg-white/10"></span>
+      </div>
+
+      <button class="w-full font-bold px-5 py-4 rounded-2xl bg-white text-noir hover:bg-white/90 transition flex items-center justify-center gap-3">
+        <svg viewBox="0 0 24 24" class="w-5 h-5"><path fill="#4285F4" d="M22.5 12.3c0-.8-.1-1.6-.2-2.3H12v4.5h5.9a5 5 0 0 1-2.2 3.3v2.7h3.6c2.1-1.9 3.2-4.7 3.2-8.2z"/><path fill="#34A853" d="M12 23c2.9 0 5.4-1 7.2-2.6l-3.6-2.7c-1 .7-2.3 1.1-3.6 1.1-2.8 0-5.1-1.9-6-4.4H2.3v2.8A11 11 0 0 0 12 23z"/><path fill="#FBBC05" d="M6 14.4a6.6 6.6 0 0 1 0-4.2V7.4H2.3a11 11 0 0 0 0 9.8z"/><path fill="#EA4335" d="M12 5.4c1.6 0 3 .5 4.1 1.6l3.1-3.1A11 11 0 0 0 2.3 7.4L6 10.2C6.9 7.7 9.2 5.4 12 5.4z"/></svg>
+        Connexion avec Google
+      </button>
+      <button class="w-full font-bold px-5 py-4 rounded-2xl bg-white text-noir hover:bg-white/90 transition flex items-center justify-center gap-3">
+        <svg viewBox="0 0 24 24" class="w-5 h-5" fill="currentColor"><path d="M16 1.8c.1 1-.3 2.1-1 2.9-.7.9-1.8 1.5-2.9 1.4-.1-1 .4-2.1 1-2.8C13.9 2.4 15 1.9 16 1.8zm3.4 16.4c-.5 1.2-.8 1.7-1.5 2.8-1 1.5-2.3 3.3-4 3.3-1.5 0-1.9-1-3.9-1s-2.5 1-3.9 1c-1.7 0-3-1.7-4-3.1C-.6 16.4-1 11 .9 8.2 1.9 6.8 3.8 5.9 5.6 5.9c1.7 0 2.8 1 4.2 1 1.4 0 2.2-1 4.2-1 1.5 0 3.2.8 4.3 2.3-3.8 2-3.2 7.4 1.1 9z"/></svg>
+        Connexion avec Apple
+      </button>
+    </div>
+
+    <p class="text-white/40 mt-8 text-sm">Vous n'avez pas encore de compte ?<br><button class="font-extrabold text-white underline decoration-red decoration-2 underline-offset-4">Inscrivez-vous</button></p>
+  </div>
+</section>
+
+<!-- ====================== ECRAN 5 : FORMULES ====================== -->
+<section id="formules" class="screen">
+  <div class="max-w-5xl mx-auto px-5 py-10 md:py-14">
+    <button onclick="nav('home')" class="text-sm font-bold text-white/50 hover:text-white flex items-center gap-1 mb-5">
+      <svg viewBox="0 0 24 24" class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2.5"><path d="m15 18-6-6 6-6"/></svg> Accueil
+    </button>
+    <div class="text-center">
+      <h1 class="font-display font-extrabold uppercase text-4xl md:text-5xl tracking-tight">Choisissez votre formule</h1>
+      <p class="text-white/55 mt-3 max-w-lg mx-auto">Payez à l'heure ou en forfait. Sans engagement, annulation jusqu'à 24 h avant.</p>
+    </div>
+    <div class="grid md:grid-cols-3 gap-4 mt-10 items-stretch">
+      <div class="bg-panel border border-white/10 rounded-3xl p-7 flex flex-col">
+        <span class="text-xs font-bold uppercase tracking-widest text-white/40">Découverte</span>
+        <div class="font-display font-extrabold text-5xl mt-2">10 €</div>
+        <p class="text-white/50 text-sm mt-1">1 heure de cours pour tester</p>
+        <ul class="text-sm text-white/70 space-y-2.5 mt-5 flex-1">
+          <li class="flex gap-2"><span class="text-dispo">✓</span> 1 leçon de 60 min</li>
+          <li class="flex gap-2"><span class="text-dispo">✓</span> Bilan de niveau</li>
+          <li class="flex gap-2"><span class="text-dispo">✓</span> Sans engagement</li>
+        </ul>
+        <button onclick="nav('connexion')" class="mt-6 w-full font-extrabold uppercase tracking-wide px-5 py-3.5 rounded-2xl border-2 border-white/15 hover:border-white transition">Choisir</button>
+      </div>
+      <div class="relative overflow-hidden bg-gradient-to-b from-red to-red-dark rounded-3xl p-7 flex flex-col md:scale-[1.04] shadow-[0_0_50px_-12px_rgba(225,29,43,.8)]">
+        <span class="absolute right-5 top-5 text-[10px] font-extrabold uppercase tracking-widest bg-white text-red px-2.5 py-1 rounded-full">Populaire</span>
+        <span class="text-xs font-bold uppercase tracking-widest text-white/80">Forfait 10 h</span>
+        <div class="font-display font-extrabold text-5xl mt-2 text-white">300 €</div>
+        <p class="text-white/80 text-sm mt-1">30 €/h — le bon rythme</p>
+        <ul class="text-sm text-white/90 space-y-2.5 mt-5 flex-1">
+          <li class="flex gap-2"><span>✓</span> 10 leçons de 60 min</li>
+          <li class="flex gap-2"><span>✓</span> Planning prioritaire</li>
+          <li class="flex gap-2"><span>✓</span> Rappels par message</li>
+          <li class="flex gap-2"><span>✓</span> Suivi de progression</li>
+        </ul>
+        <button onclick="nav('connexion')" class="mt-6 w-full font-extrabold uppercase tracking-wide px-5 py-3.5 rounded-2xl bg-white text-red hover:bg-white/90 transition active:scale-[.98]">Choisir</button>
+      </div>
+      <div class="bg-panel border border-white/10 rounded-3xl p-7 flex flex-col">
+        <span class="text-xs font-bold uppercase tracking-widest text-white/40">Forfait 20 h</span>
+        <div class="font-display font-extrabold text-5xl mt-2">560 €</div>
+        <p class="text-white/50 text-sm mt-1">28 €/h — le plus complet</p>
+        <ul class="text-sm text-white/70 space-y-2.5 mt-5 flex-1">
+          <li class="flex gap-2"><span class="text-dispo">✓</span> 20 leçons de 60 min</li>
+          <li class="flex gap-2"><span class="text-dispo">✓</span> Planning prioritaire</li>
+          <li class="flex gap-2"><span class="text-dispo">✓</span> Préparation examen</li>
+          <li class="flex gap-2"><span class="text-dispo">✓</span> Annulation flexible</li>
+        </ul>
+        <button onclick="nav('connexion')" class="mt-6 w-full font-extrabold uppercase tracking-wide px-5 py-3.5 rounded-2xl border-2 border-white/15 hover:border-white transition">Choisir</button>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ====================== ECRAN 6 : AIDE & SUPPORT (élève / moniteur) ====================== -->
+<section id="aide" class="screen">
+  <div class="relative max-w-5xl mx-auto px-5 py-8 md:py-10">
+    <button onclick="nav('home')" class="text-sm font-bold text-white/50 hover:text-white flex items-center gap-1 mb-4">
+      <svg viewBox="0 0 24 24" class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2.5"><path d="m15 18-6-6 6-6"/></svg> Accueil
+    </button>
+
+    <h1 class="font-display font-extrabold uppercase text-4xl md:text-5xl tracking-tight text-center">Comment pouvons-nous <span class="text-red">vous aider</span> ?</h1>
+
+    <!-- recherche articles -->
+    <div class="mt-6 max-w-xl mx-auto bg-white rounded-2xl p-1.5 flex items-center gap-2 shadow-2xl">
+      <svg viewBox="0 0 24 24" class="w-5 h-5 ml-3 text-noir/40 shrink-0" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="7"/><path d="m20 20-3-3"/></svg>
+      <input type="text" placeholder="Recherchez dans nos articles…" class="flex-1 bg-transparent outline-none text-noir text-base placeholder:text-noir/40 min-w-0 py-2.5">
+    </div>
+    <p class="text-center text-white/40 text-sm mt-3">Recherches populaires :
+      <button onclick="toast('Article (démo)')" class="text-red font-semibold hover:underline">réserver</button> ·
+      <button onclick="toast('Article (démo)')" class="text-red font-semibold hover:underline">annuler</button> ·
+      <button onclick="toast('Article (démo)')" class="text-red font-semibold hover:underline">paiement</button>
+    </p>
+
+    <!-- onglets élève / moniteur -->
+    <div class="mt-8 max-w-md mx-auto bg-panel2 border border-white/10 rounded-2xl p-1 grid grid-cols-2 text-sm font-bold">
+      <button id="aideTabEleve" onclick="setAideTab(0)" class="py-3 rounded-xl bg-red text-white transition">Je suis élève</button>
+      <button id="aideTabMoniteur" onclick="setAideTab(1)" class="py-3 rounded-xl text-white/60 transition">Je suis moniteur</button>
+    </div>
+
+    <!-- cartes thèmes (rendues en JS selon l'onglet) -->
+    <div id="aideCards" class="grid sm:grid-cols-2 gap-4 mt-7"></div>
+
+    <!-- FAQ accordéon -->
+    <h2 class="font-display font-extrabold uppercase text-2xl tracking-tight mt-12 mb-4">Questions fréquentes</h2>
+    <div id="faqList" class="space-y-3"></div>
+
+    <!-- SUPPORT : formulaire de demande -->
+    <div class="mt-12 relative overflow-hidden bg-panel border border-white/10 rounded-3xl p-6 md:p-8">
+      <svg viewBox="0 0 240 110" class="car-watermark right-0 bottom-0 w-56" style="opacity:.06"><path d="M15 78 q4 -2 12 -3 l10 -22 q5 -10 20 -11 l60 0 q14 1 22 11 l16 24 q18 1 28 6 q10 5 10 11 l-188 0 q-12 0 -12 -10 z M55 86 a14 14 0 1 0 0.1 0 M180 86 a14 14 0 1 0 0.1 0" fill="none" stroke="#fff" stroke-width="3"/></svg>
+      <div class="relative">
+        <h2 class="font-display font-extrabold uppercase text-2xl tracking-tight">Un problème ? Contactez le support</h2>
+        <p class="text-white/55 text-sm mt-1">On vous répond sous 24 h. Décrivez votre souci, on s'en occupe.</p>
+        <div class="grid sm:grid-cols-2 gap-3 mt-5">
+          <input type="text" placeholder="Votre nom" class="bg-panel2 border border-white/10 rounded-xl px-4 py-3.5 outline-none text-white focus:border-red transition placeholder:text-white/35">
+          <input type="email" placeholder="Votre email" class="bg-panel2 border border-white/10 rounded-xl px-4 py-3.5 outline-none text-white focus:border-red transition placeholder:text-white/35">
+        </div>
+        <select class="w-full mt-3 bg-panel2 border border-white/10 rounded-xl px-4 py-3.5 outline-none text-white/70 focus:border-red transition">
+          <option>Sujet : Réservation</option>
+          <option>Sujet : Paiement</option>
+          <option>Sujet : Mon compte</option>
+          <option>Sujet : Je suis moniteur</option>
+          <option>Sujet : Autre</option>
+        </select>
+        <textarea rows="4" placeholder="Décrivez votre demande…" class="w-full mt-3 bg-panel2 border border-white/10 rounded-xl px-4 py-3.5 outline-none text-white focus:border-red transition placeholder:text-white/35 resize-none"></textarea>
+        <button onclick="toast('Demande envoyée — réponse sous 24 h (démo)')" class="mt-3 w-full sm:w-auto font-extrabold uppercase tracking-wide px-6 py-3.5 rounded-2xl bg-red text-white hover:bg-red-bright transition shadow-[0_0_30px_-8px_rgba(225,29,43,.9)]">Envoyer ma demande</button>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ====================== ECRAN 7 : PARRAINAGE ====================== -->
+<section id="parrainage" class="screen">
+  <div class="relative max-w-3xl mx-auto px-5 py-8 md:py-12">
+    <button onclick="nav('home')" class="text-sm font-bold text-white/50 hover:text-white flex items-center gap-1 mb-4">
+      <svg viewBox="0 0 24 24" class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2.5"><path d="m15 18-6-6 6-6"/></svg> Accueil
+    </button>
+
+    <div class="text-center">
+      <span class="inline-flex items-center gap-2 text-xs font-extrabold uppercase tracking-widest bg-blue/15 text-blue-light border border-blue/30 px-3 py-1.5 rounded-full">Parrainage CandiCar</span>
+      <h1 class="font-display font-extrabold uppercase text-4xl md:text-5xl tracking-tight mt-4">Parrainez vos potes,<br><span class="text-blue-light">gagnez 2 mois offerts</span></h1>
+      <p class="text-white/55 mt-3 max-w-lg mx-auto">Votre filleul s'inscrit avec votre code, prend sa 1ʳᵉ leçon, et vous gagnez chacun <span class="text-white font-bold">2 mois Premium offerts</span>.</p>
+    </div>
+
+    <!-- lien + code -->
+    <div class="mt-8 bg-panel border border-white/10 rounded-3xl p-6 space-y-4">
+      <div>
+        <label class="text-xs font-bold uppercase tracking-widest text-white/40">Votre lien d'affiliation</label>
+        <div class="mt-2 flex items-center gap-2 bg-panel2 border border-white/10 rounded-xl p-1.5">
+          <span id="refLink" class="flex-1 px-3 text-sm text-white/80 truncate">candicar.fr/r/AB12CD</span>
+          <button onclick="copier('candicar.fr/r/AB12CD')" class="shrink-0 font-bold text-sm px-4 py-2.5 rounded-lg bg-blue text-white hover:bg-blue-light transition">Copier</button>
+        </div>
+      </div>
+      <div>
+        <label class="text-xs font-bold uppercase tracking-widest text-white/40">Votre code promo</label>
+        <div class="mt-2 flex items-center gap-2 bg-panel2 border border-white/10 rounded-xl p-1.5">
+          <span class="flex-1 px-3 font-display font-extrabold text-xl tracking-widest text-blue-light">CANDI-AB12</span>
+          <button onclick="copier('CANDI-AB12')" class="shrink-0 font-bold text-sm px-4 py-2.5 rounded-lg bg-blue text-white hover:bg-blue-light transition">Copier</button>
+        </div>
+      </div>
+      <div class="flex gap-2 pt-1">
+        <button onclick="toast('Partage WhatsApp (démo)')" class="flex-1 font-bold text-sm py-3 rounded-xl bg-panel2 border border-white/10 hover:border-blue transition">Partager sur WhatsApp</button>
+        <button onclick="toast('Partage par SMS (démo)')" class="flex-1 font-bold text-sm py-3 rounded-xl bg-panel2 border border-white/10 hover:border-blue transition">Partager par SMS</button>
+      </div>
+    </div>
+
+    <!-- compteur -->
+    <div class="grid grid-cols-2 gap-4 mt-4">
+      <div class="bg-panel border border-white/10 rounded-2xl p-5 text-center">
+        <div class="font-display font-extrabold text-4xl text-blue-light">3</div>
+        <p class="text-white/50 text-sm mt-1">amis parrainés</p>
+      </div>
+      <div class="bg-panel border border-white/10 rounded-2xl p-5 text-center">
+        <div class="font-display font-extrabold text-4xl text-blue-light">6 mois</div>
+        <p class="text-white/50 text-sm mt-1">Premium gagnés</p>
+      </div>
+    </div>
+
+    <!-- comment ça marche -->
+    <div class="grid sm:grid-cols-3 gap-4 mt-8">
+      <div class="bg-panel border border-white/10 rounded-2xl p-5"><div class="font-display font-extrabold text-blue-light text-2xl">01</div><p class="text-sm text-white/70 mt-1 font-semibold">Partagez votre code</p></div>
+      <div class="bg-panel border border-white/10 rounded-2xl p-5"><div class="font-display font-extrabold text-blue-light text-2xl">02</div><p class="text-sm text-white/70 mt-1 font-semibold">Votre filleul réserve sa 1ʳᵉ leçon</p></div>
+      <div class="bg-panel border border-white/10 rounded-2xl p-5"><div class="font-display font-extrabold text-blue-light text-2xl">03</div><p class="text-sm text-white/70 mt-1 font-semibold">Vous gagnez 2 mois chacun</p></div>
+    </div>
+  </div>
+</section>
+
+<!-- ====================== ECRAN 8 : À PROPOS (storytelling) ====================== -->
+<section id="apropos" class="screen">
+  <div class="relative max-w-3xl mx-auto px-5 py-8 md:py-12">
+    <button onclick="nav('home')" class="text-sm font-bold text-white/50 hover:text-white flex items-center gap-1 mb-4">
+      <svg viewBox="0 0 24 24" class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2.5"><path d="m15 18-6-6 6-6"/></svg> Accueil
+    </button>
+
+    <!-- hero histoire -->
+    <div class="relative overflow-hidden rounded-[1.6rem] glow-red bg-noir p-8 md:p-12 text-center">
+      <svg viewBox="0 0 240 110" class="car-watermark left-1/2 -translate-x-1/2 bottom-0 w-96" style="opacity:.08"><path d="M15 78 q4 -2 12 -3 l10 -22 q5 -10 20 -11 l60 0 q14 1 22 11 l16 24 q18 1 28 6 q10 5 10 11 l-188 0 q-12 0 -12 -10 z M55 86 a14 14 0 1 0 0.1 0 M180 86 a14 14 0 1 0 0.1 0" fill="none" stroke="#E11D2B" stroke-width="3"/></svg>
+      <p class="relative text-red font-bold uppercase tracking-[.2em] text-xs">Notre histoire</p>
+      <h1 class="relative font-display font-extrabold uppercase text-4xl md:text-5xl tracking-tight mt-3">Pourquoi <span class="text-red">CandiCar</span> existe</h1>
+      <p class="relative text-white/60 mt-4 max-w-xl mx-auto leading-relaxed">Passer le permis en candidat libre, c'est galérer à trouver un moniteur dispo près de chez soi. CandiCar est né pour régler ça : mettre en relation, en quelques clics, les candidats libres et les moniteurs de leur quartier.</p>
+    </div>
+
+    <!-- sections storytelling (éditables plus tard via l'admin) -->
+    <div class="mt-6 space-y-4">
+      <div class="bg-panel border border-white/10 rounded-3xl p-6 md:p-8">
+        <h2 class="font-display font-extrabold uppercase text-2xl tracking-tight">Qui suis-je ?</h2>
+        <p class="text-white/65 mt-3 leading-relaxed text-[15px]">[ Espace à compléter ] — Racontez votre parcours, ce qui vous a poussée à créer CandiCar, votre lien avec le monde de la conduite et des candidats libres. Ce texte sera modifiable depuis le mode admin.</p>
+      </div>
+      <div class="bg-panel border border-white/10 rounded-3xl p-6 md:p-8">
+        <h2 class="font-display font-extrabold uppercase text-2xl tracking-tight">Notre mission</h2>
+        <p class="text-white/65 mt-3 leading-relaxed text-[15px]">Rendre le permis plus accessible et moins cher, en valorisant les moniteurs indépendants et en redonnant le choix aux élèves. Pas de grosse auto-école : juste vous, un moniteur de confiance, et la route.</p>
+      </div>
+      <div class="bg-panel border border-white/10 rounded-3xl p-6 md:p-8">
+        <h2 class="font-display font-extrabold uppercase text-2xl tracking-tight">Nos valeurs</h2>
+        <ul class="text-white/65 mt-3 space-y-2 text-[15px]">
+          <li class="flex gap-2"><span class="text-red font-bold">→</span> Transparence sur les prix et les dispos</li>
+          <li class="flex gap-2"><span class="text-red font-bold">→</span> Proximité : un moniteur près de chez vous</li>
+          <li class="flex gap-2"><span class="text-red font-bold">→</span> Liberté : vous choisissez, vous réservez</li>
+        </ul>
+      </div>
+    </div>
+
+    <button onclick="nav('resultats')" class="mt-8 w-full font-extrabold uppercase tracking-wide px-6 py-4 rounded-2xl bg-red text-white hover:bg-red-bright transition shadow-[0_0_30px_-8px_rgba(225,29,43,.9)]">Trouver mon moniteur →</button>
+  </div>
+</section>
+
+</main>
+
+<footer class="relative mt-10 border-t border-white/10 overflow-hidden">
+  <svg viewBox="0 0 240 110" class="car-watermark left-1/2 -translate-x-1/2 bottom-0 w-80" style="opacity:.05"><path d="M15 78 q4 -2 12 -3 l10 -22 q5 -10 20 -11 l60 0 q14 1 22 11 l16 24 q18 1 28 6 q10 5 10 11 l-188 0 q-12 0 -12 -10 z M55 86 a14 14 0 1 0 0.1 0 M180 86 a14 14 0 1 0 0.1 0" fill="none" stroke="#fff" stroke-width="3"/></svg>
+  <div class="relative max-w-6xl mx-auto px-5 py-10 flex flex-col md:flex-row items-center justify-between gap-4 text-sm text-white/50">
+    <div class="font-display font-extrabold uppercase text-xl text-white">Candi<span class="text-red">Car</span></div>
+    <p>Moniteurs ↔ candidats libres · Maquette de démonstration</p>
+  </div>
+</footer>
+
+<!-- ====================== CHATBOT FLOTTANT ====================== -->
+<div id="chatPanel" class="hidden fixed bottom-24 right-4 sm:right-6 z-[55] w-[min(90vw,360px)] bg-panel border border-white/10 rounded-3xl shadow-2xl overflow-hidden">
+  <div class="bg-gradient-to-r from-red to-red-dark p-4 flex items-center gap-3">
+    <div class="w-10 h-10 rounded-full bg-white/15 grid place-items-center">
+      <svg viewBox="0 0 24 24" class="w-5 h-5 text-white" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+    </div>
+    <div class="flex-1">
+      <p class="font-extrabold text-white leading-tight">Assistant CandiCar</p>
+      <p class="text-white/70 text-xs flex items-center gap-1"><span class="w-1.5 h-1.5 rounded-full bg-dispo"></span> En ligne</p>
+    </div>
+    <button onclick="toggleChat()" class="text-white/80 hover:text-white"><svg viewBox="0 0 24 24" class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M18 6 6 18M6 6l12 12"/></svg></button>
+  </div>
+  <div id="chatBody" class="p-4 space-y-3 max-h-72 overflow-y-auto">
+    <div class="bg-panel2 rounded-2xl rounded-tl-sm p-3 text-sm text-white/85 max-w-[85%]">Salut 👋 Je suis l'assistant CandiCar. Comment puis-je vous aider ?</div>
+  </div>
+  <div class="p-3 border-t border-white/10 flex flex-wrap gap-2">
+    <button onclick="chatAsk('Comment réserver ?')" class="text-xs font-bold px-3 py-2 rounded-full bg-panel2 border border-white/10 hover:border-red transition">Comment réserver ?</button>
+    <button onclick="chatAsk('Annuler une leçon')" class="text-xs font-bold px-3 py-2 rounded-full bg-panel2 border border-white/10 hover:border-red transition">Annuler une leçon</button>
+    <button onclick="chatAsk('Parler à un humain')" class="text-xs font-bold px-3 py-2 rounded-full bg-panel2 border border-white/10 hover:border-red transition">Parler à un humain</button>
+  </div>
+</div>
+<button onclick="toggleChat()" id="chatBtn" class="fixed bottom-6 right-4 sm:right-6 z-[55] w-14 h-14 rounded-full bg-red text-white grid place-items-center shadow-[0_0_30px_-6px_rgba(225,29,43,.9)] hover:bg-red-bright transition active:scale-95">
+  <svg viewBox="0 0 24 24" class="w-7 h-7" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+</button>
+
+<div id="toast" class="hidden fixed bottom-6 left-1/2 -translate-x-1/2 z-[60] bg-white text-noir px-5 py-3.5 rounded-2xl shadow-2xl text-sm font-bold flex items-center gap-3"></div>
+
+<!-- Données (faux contenu) — remplacé par Supabase plus tard -->
+<script src="./js/data.js"></script>
+<!-- Logique de l'application -->
+<script src="./js/app.js"></script>
+</body>
+</html>
